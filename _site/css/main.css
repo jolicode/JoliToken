@@ -1,0 +1,12 @@
+body { padding-top: 70px; }
+
+
+.label {
+   font-size: 1em;
+   line-height: 2em;
+}
+
+.label span {
+   font-weight: normal;
+   font-size: 0.7em;
+}

@@ -48,23 +48,16 @@ var JoliToken = (function() {
         }).fail(handleError);
     };
 
-    var doDisplay = function (vectors, source) {
+    var doDisplay = function (vectors, source, nested) {
         if (!vectors.found) {
             // @todo display error?
             return null;
         }
 
-        var results = $('#results');
-        results.removeClass('hidden');
-
-        // @todo color
-        $('#originalDoc').html(JSON.stringify(source, undefined, 1));
-
-        var vectorsHtml = "";
-        console.log(vectors);
+        var vectorsHtml = nested !== false ? "<h5>Nested " + nested + "</h5>" : "<h4>Tokens</h4>";
+        vectorsHtml += "<ul>";
 
         $.each(vectors.term_vectors, function(path) {
-
             var currentPathTerms = vectors.term_vectors[path].terms;
             var row = "<li>";
 
@@ -100,34 +93,105 @@ var JoliToken = (function() {
             vectorsHtml += row;
         });
 
-        $('#vectors').html(vectorsHtml);
+        vectorsHtml += "</ul>";
+
+        $('#vectors')[ nested ? 'append' : 'prepend' ](vectorsHtml);
     };
 
-    var displayDocToken = function () {
+    /**
+     * Return the nested documents by reading the Mapping and the Source!
+     *
+     * @param source
+     * @returns {Array}
+     */
+    var getNestedDocuments = function (source) {
+        var path        = $('#path').val();
+        var indexName   = path.split('/')[0];
+        var typeName    = path.split('/')[1];
+        var mapping     = {};
+
+        $.ajax({
+            type: "GET",
+            url: host + path + "/_mapping",
+            success: function(data) {
+                mapping = data[indexName].mappings[typeName].properties;
+            },
+            dataType: "json",
+            async: false
+        });
+
+        var nestedObjects = [];
+
+        function iterateOnProperties(properties, source, fullPath) {
+            for (var property in properties) {
+                if (properties.hasOwnProperty(property)) {
+                    if (properties[property].type === "nested") {
+                        fullPath += "." + property;
+                        for (var subObject in source[property]) {
+                            if (source[property].hasOwnProperty(subObject)) {
+                                nestedObjects.push({fullPath: fullPath, source: source[property][subObject]});
+                            }
+                        }
+                    } else if (typeof (properties[property].properties) !== "undefined") {
+                        fullPath += "." + property;
+                        iterateOnProperties(properties[property].properties, source[property], fullPath);
+                    }
+                }
+            }
+        }
+
+        iterateOnProperties(mapping, source, "");
+
+        return nestedObjects;
+    };
+
+    var doFetchTermVectors = function (source, path, nested) {
+        var payload = {
+            doc: source,
+            offsets : true,
+            positions : true,
+            term_statistics : true,
+            field_statistics : false
+        };
+
+        $.ajax({
+            type: "POST",
+            url: host + path + "/_termvector",
+            data: JSON.stringify(payload),
+            success: function(data) {
+                doDisplay(data, source, nested);
+            },
+            dataType: "json"
+        });
+    };
+
+    /**
+     * Start the Callback Hell :)
+     */
+    var startDisplayDocToken = function () {
         var path        = $('#path').val();
         var identifier  = $('#identifier').val();
 
         // Get the full document _source
         $.getJSON(host + path + "/" + identifier + "/_source").done(function(source) {
-            console.log(source);
+            // Doc exists!
+            var results = $('#results');
+            $('#vectors').html('');
+            results.removeClass('hidden');
 
-            var payload = {
-                doc: source,
-                offsets : true,
-                positions : true,
-                term_statistics : true,
-                field_statistics : false
-            };
+            // @todo color
+            $('#originalDoc').html(JSON.stringify(source, undefined, 1));
 
-            $.ajax({
-                type: "POST",
-                url: host + path + "/_termvector",
-                data: JSON.stringify(payload),
-                success: function(data) {
-                    doDisplay(data, source);
-                },
-                dataType: "json"
-            });
+            // Do the doc has any nested fields? Because the Term Vector API does not load them...
+            var nestedDocuments = getNestedDocuments(source);
+
+            doFetchTermVectors(source, path, false);
+
+            for (var nestedDocument in nestedDocuments) {
+                if (nestedDocuments.hasOwnProperty(nestedDocument)) {
+                    doFetchTermVectors(nestedDocuments[nestedDocument].source, path, nestedDocuments[nestedDocument].fullPath);
+                }
+            }
         }).fail(handleError);
     };
 
@@ -142,7 +206,7 @@ var JoliToken = (function() {
         $('#doc').submit(function(e) {
             e.preventDefault();
 
-            displayDocToken();
+            startDisplayDocToken();
         });
 
         hostField.closest('form').submit(function(e) {

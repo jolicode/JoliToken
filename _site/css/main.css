@@ -10,3 +10,7 @@ body { padding-top: 70px; }
    font-weight: normal;
    font-size: 0.7em;
 }
+
+.navbar.navbar-inverse label {
+   color: #e3e3e3;
+}

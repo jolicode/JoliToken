@@ -24,6 +24,8 @@ var JoliToken = (function() {
     };
 
     var computeIndexList = function() {
+        var displayHidden = $('#hiddenIndices').is(':checked');
+
         $.getJSON(host + "_mapping").done(function(mapping) {
             var options = "";
 
@@ -31,6 +33,10 @@ var JoliToken = (function() {
                 if (mapping.hasOwnProperty(indexName)) {
                     for (var typeName in mapping[indexName].mappings) {
                         if (mapping[indexName].mappings.hasOwnProperty(typeName)) {
+                            if (!displayHidden && indexName[0] === '.') {
+                                continue;
+                            }
+
                             var key = indexName + '/' + typeName;
                             options += '<option value="' + key + '">' + key + '</option>';
                         }
@@ -126,7 +132,8 @@ var JoliToken = (function() {
     };
 
     var init = function () {
-        host = $('#host').val();
+        var hostField = $('#host');
+        host = hostField.val();
 
         computeIndexList();
 
@@ -137,6 +144,17 @@ var JoliToken = (function() {
 
             displayDocToken();
         });
+
+        hostField.closest('form').submit(function(e) {
+            e.preventDefault();
+
+            host = hostField.val();
+            computeIndexList();
+        });
+
+        $('#hiddenIndices').on('change', function() {
+            computeIndexList();
+        })
     };
 
     return {

@@ -30,6 +30,11 @@
             <div class="form-group">
                 <input type="text" id="host" placeholder="Host" value="http://localhost:9200/" class="form-control">
             </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="hiddenIndices" value="1"> Hidden indices
+                </label>
+            </div>
             <button type="submit" class="btn btn-success">Set server</button>
         </form>
     </div>
@@ -50,7 +55,7 @@
                 </div>
                 <div class="form-group">
                     <label for="identifier">Identifier</label>
-                    <input type="text" class="form-control" id="identifier" placeholder="42">
+                    <input type="text" class="form-control" id="identifier" required>
                 </div>
                 <button type="submit" class="btn btn-default">Display all the tokens</button>
             </form>

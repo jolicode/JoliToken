@@ -4,6 +4,7 @@ body { padding-top: 70px; }
 .label {
    font-size: 1em;
    line-height: 2em;
+   border: 1px solid black;
 }
 
 .label span {
@@ -13,4 +14,29 @@ body { padding-top: 70px; }
 
 .navbar.navbar-inverse label {
    color: #e3e3e3;
+}
+
+.label-default {
+   background-color: white;
+   color: #777
+}
+.label-primary {
+   background-color: white;
+   color: #337ab7
+}
+.label-success {
+   background-color: white;
+   color: #5cb85c
+}
+.label-info {
+   background-color: white;
+   color: #5bc0de
+}
+.label-warning {
+   background-color: white;
+   color: #f0ad4e
+}
+.label-danger {
+   background-color: white;
+   color: #d9534f
 }

@@ -16,9 +16,9 @@ var JoliToken = (function() {
     };
 
     var getLabelColor = function(count) {
-        if (count > 50) { return 'danger' }
-        if (count > 30) { return 'warning' }
-        if (count > 10) { return 'primary' }
+        if (count > 45) { return 'danger' }
+        if (count > 20) { return 'warning' }
+        if (count > 5) { return 'primary' }
 
         return 'default';
     };
@@ -77,15 +77,17 @@ var JoliToken = (function() {
 
             $.each(sortable, function(term) {
                 var count = sortable[term].object.tokens.length;
+                var title = "doc_freq: " + sortable[term].object.doc_freq + ", term_freq: " + sortable[term].object.term_freq + ", ttf: " + sortable[term].object.ttf;
+
+                row += ' <span data-toggle="tooltip" data-placement="top" title="' + title + '" class="label label-';
+                row += getLabelColor(count);
+                row += '">' + sortable[term].term;
 
                 if (count > 1) {
-                    row += ' <span class="label label-';
-
-                    row += getLabelColor(count);
-                    row += '">' + sortable[term].term + ' <span>(' +count+ ')</span></span> ';
-                } else {
-                    row += ' <span class="label label-default">' + sortable[term].term  + '</span>';
+                    row += ' <span>(' +count+ ')</span>';
                 }
+
+                row += '</span>';
             });
 
             row += "</li>";
@@ -96,6 +98,11 @@ var JoliToken = (function() {
         vectorsHtml += "</ul>";
 
         $('#vectors')[ nested ? 'append' : 'prepend' ](vectorsHtml);
+
+        // Heavy?
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     };
 
     /**

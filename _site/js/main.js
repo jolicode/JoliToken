@@ -1,6 +1,15 @@
+/**
+ * If you have time to read this, maybe you have to contribute? YAY :)
+ *
+ * @type {{init}}
+ */
 var JoliToken = (function() {
     var host;
 
+    /**
+     * Display ugly alert() to user when something goes bad
+     * @param e
+     */
     var handleError = function(e) {
         var msg = "Error: ";
 
@@ -15,6 +24,12 @@ var JoliToken = (function() {
         alert(msg);
     };
 
+    /**
+     * From a count of token, get a color. Totally arbitrary.
+     *
+     * @param count
+     * @returns {*}
+     */
     var getLabelColor = function(count) {
         if (count > 45) { return 'danger' }
         if (count > 20) { return 'warning' }
@@ -23,6 +38,9 @@ var JoliToken = (function() {
         return 'default';
     };
 
+    /**
+     * Update the select dropdown with a list of index/type fetched from the server
+     */
     var computeIndexList = function() {
         var displayHidden = $('#hiddenIndices').is(':checked');
 
@@ -48,6 +66,14 @@ var JoliToken = (function() {
         }).fail(handleError);
     };
 
+    /**
+     * Actually display the vectors
+     *
+     * @param vectors   The vectors. Yep.
+     * @param source    The original doc (the nested one for nested)
+     * @param nested    False when it's the real doc, a path when it's nested
+     * @returns {null}
+     */
     var doDisplay = function (vectors, source, nested) {
         if (!vectors.found) {
             // @todo display error?
@@ -152,6 +178,13 @@ var JoliToken = (function() {
         return nestedObjects;
     };
 
+    /**
+     * For a source document, fetch the vectors for the API
+     *
+     * @param source
+     * @param path
+     * @param nested
+     */
     var doFetchTermVectors = function (source, path, nested) {
         var payload = {
             doc: source,
@@ -202,13 +235,14 @@ var JoliToken = (function() {
         }).fail(handleError);
     };
 
+    /**
+     * Bind some events and make it works.
+     */
     var init = function () {
         var hostField = $('#host');
         host = hostField.val();
 
         computeIndexList();
-
-        // @todo populate list of index/types
 
         $('#doc').submit(function(e) {
             e.preventDefault();

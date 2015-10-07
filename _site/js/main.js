@@ -165,7 +165,7 @@ var JoliToken = (function() {
                                 nestedObjects.push({fullPath: fullPath, source: source[property][subObject]});
                             }
                         }
-                    } else if (typeof (properties[property].properties) !== "undefined") {
+                    } else if (typeof (properties[property].properties) !== "undefined" && typeof (source[property]) !== "undefined") {
                         fullPath += "." + property;
                         iterateOnProperties(properties[property].properties, source[property], fullPath);
                     }
